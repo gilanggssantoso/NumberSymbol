@@ -1,40 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Symbol Addition Test</title>
+    <title>Tes Angka Simbol</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray background */
-            touch-action: manipulation; /* Prevent double-tap zoom on mobile */
+            background-color: #f3f4f6;
+            touch-action: manipulation;
         }
         
+        /* Updated Legend Table with much larger text and spacing for legibility */
         .legend-table {
-            background-color: #E8C3C3; /* Muted pinkish-peach */
-            border: 2px solid #5a3d2b;
+            background-color: #E8C3C3; /* Muted dusty pink/peach */
+            border: 3px solid #5a3d2b;
             border-collapse: collapse;
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         
         .legend-table th, .legend-table td {
             border: 1px solid #8c6246;
             text-align: center;
-            padding: 8px 4px;
-            font-size: 1.25rem;
+            padding: 12px 8px; /* Increased padding */
+            font-size: 2rem; /* Significantly larger text size */
+            line-height: 1;
         }
 
         .legend-table th {
-            font-weight: 500;
+            font-weight: 600;
+            color: #333;
         }
         
         .legend-table td {
-            font-family: serif; /* Better display for some symbols */
-            font-size: 1.5rem;
+            font-family: 'Times New Roman', serif; /* Better rendering for math/Greek symbols */
+            color: #111;
         }
 
         .flash-red {
@@ -48,60 +53,85 @@
         }
 
         .numpad-btn {
-            background-color: #f8fafc;
-            border: 2px solid #3b82f6; /* Blueish border like the image */
+            background-color: #ffffff;
+            border: 2px solid #3b82f6;
             color: #1e3a8a;
-            font-size: 1.5rem;
-            border-radius: 4px;
-            padding: 1rem;
+            font-size: 1.75rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
             transition: all 0.1s;
             cursor: pointer;
             user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .numpad-btn:active {
             background-color: #dbeafe;
-            transform: scale(0.98);
+            transform: scale(0.95);
+            box-shadow: none;
+        }
+
+        .hidden-screen {
+            display: none !important;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300" id="game-body">
 
-    <!-- Start / Game Over Screen -->
-    <div id="overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-        <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-sm w-full mx-4">
-            <h1 class="text-2xl font-bold mb-4" id="overlay-title">Symbol Addition Test</h1>
-            <p class="text-gray-600 mb-6" id="overlay-desc">Add the values of the two symbols. If the sum is 10 or more, enter only the last digit (e.g., 8 + 7 = 15, answer is 5).<br><br>You have 60 seconds.</p>
-            
-            <div id="final-score-container" class="hidden mb-6">
-                <p class="text-lg text-gray-500">Your Score</p>
-                <p class="text-5xl font-black text-blue-600" id="final-score">0</p>
-            </div>
-
-            <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg">
-                Start Test
-            </button>
+    <!-- START SCREEN -->
+    <div id="start-screen" class="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Tes Angka Simbol</h1>
+        
+        <div class="bg-blue-50 text-blue-800 p-4 rounded-lg mb-6 text-sm leading-relaxed border border-blue-200">
+            <h2 class="font-bold text-lg mb-2">Instruksi:</h2>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Anda akan melihat tabel legenda yang memetakan angka 0-9 ke simbol tertentu.</li>
+                <li>Di bawahnya, akan muncul dua simbol. Tugas Anda adalah <strong>menjumlahkan</strong> nilai kedua simbol tersebut.</li>
+                <li>Jika hasilnya 10 atau lebih, cukup masukkan <strong>digit terakhirnya saja</strong> (Contoh: 8 + 7 = 15, ketik 5).</li>
+                <li>Tes dibagi menjadi beberapa set. Setiap set berlangsung selama <strong>1 menit</strong> dengan maksimal <strong>50 soal</strong>.</li>
+                <li>Kerjakan secepat dan seteliti mungkin!</li>
+            </ul>
         </div>
+
+        <div class="mb-6">
+            <label for="duration" class="block text-gray-700 font-semibold mb-2">Pilih Durasi Tes:</label>
+            <select id="duration" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-3">
+                <option value="3">3 Menit (3 Set)</option>
+                <option value="5">5 Menit (5 Set)</option>
+                <option value="10">10 Menit (10 Set)</option>
+                <option value="20">20 Menit (20 Set)</option>
+                <option value="30">30 Menit (30 Set)</option>
+                <option value="60">60 Menit (60 Set)</option>
+            </select>
+        </div>
+
+        <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-xl shadow-lg">
+            Mulai Tes
+        </button>
     </div>
 
-    <!-- Main Game UI -->
-    <div class="w-full max-w-md flex flex-col items-center gap-6">
+    <!-- TEST SCREEN -->
+    <div id="test-screen" class="hidden-screen w-full max-w-2xl flex flex-col items-center gap-6">
         
-        <!-- Header: Timer and Score -->
-        <div class="flex justify-between w-full text-lg font-semibold text-gray-700 px-2">
-            <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span id="timer">60</span>s
+        <!-- Header Info -->
+        <div class="w-full bg-white rounded-xl shadow-sm p-4 flex justify-between items-center border border-gray-200">
+            <div class="text-center">
+                <p class="text-sm text-gray-500 font-semibold uppercase">Waktu Tersisa (Set)</p>
+                <p class="text-2xl font-bold text-red-600"><span id="timer">60</span>s</p>
             </div>
-            <div class="flex items-center gap-2">
-                Score: <span id="score" class="text-blue-600 text-xl font-bold">0</span>
+            <div class="text-center">
+                <p class="text-sm text-gray-500 font-semibold uppercase">Set Saat Ini</p>
+                <p class="text-2xl font-bold text-gray-800"><span id="current-set">1</span> / <span id="total-sets">3</span></p>
+            </div>
+            <div class="text-center">
+                <p class="text-sm text-gray-500 font-semibold uppercase">Soal Terjawab</p>
+                <p class="text-2xl font-bold text-blue-600"><span id="questions-count">0</span> / 50</p>
             </div>
         </div>
 
-        <!-- Legend Table -->
-        <table class="legend-table shadow-sm">
+        <!-- Enlarged Legend Table -->
+        <table class="legend-table">
             <thead>
                 <tr>
                     <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
@@ -117,14 +147,17 @@
         </table>
 
         <!-- Problem Display -->
-        <div class="py-8 w-full flex items-center justify-center">
-            <h2 id="problem-display" class="text-6xl font-serif text-gray-800 tracking-widest">
+        <div class="bg-white rounded-xl shadow-sm w-full py-8 flex flex-col items-center justify-center border border-gray-200 min-h-[160px]">
+            <h2 id="problem-display" class="text-7xl font-serif text-gray-900 tracking-[0.2em]">
                 ¢ + ∞
             </h2>
+            <p id="waiting-msg" class="text-xl text-orange-600 font-semibold hidden">
+                Set selesai. Menunggu menit berikutnya...
+            </p>
         </div>
 
         <!-- Number Pad -->
-        <div class="grid grid-cols-3 gap-3 w-full">
+        <div class="grid grid-cols-3 gap-3 w-full max-w-sm" id="numpad">
             <button class="numpad-btn" onclick="submitAnswer(7)">7</button>
             <button class="numpad-btn" onclick="submitAnswer(8)">8</button>
             <button class="numpad-btn" onclick="submitAnswer(9)">9</button>
@@ -137,110 +170,234 @@
             <button class="numpad-btn" onclick="submitAnswer(2)">2</button>
             <button class="numpad-btn" onclick="submitAnswer(3)">3</button>
             
-            <button class="numpad-btn col-span-3" onclick="submitAnswer(0)">0</button>
+            <button class="numpad-btn col-span-3 bg-gray-100" onclick="submitAnswer(0)">0</button>
+        </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="result-screen" class="hidden-screen w-full max-w-4xl bg-white p-8 rounded-2xl shadow-xl">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Hasil Tes Anda</h2>
+        <p class="text-center text-gray-600 mb-8" id="total-score-display">Total Benar: 0</p>
+        
+        <div class="w-full h-80 mb-8">
+            <canvas id="resultsChart"></canvas>
+        </div>
+
+        <div class="flex justify-center">
+            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg shadow-md">
+                Kembali ke Beranda
+            </button>
         </div>
     </div>
 
     <script>
-        // Mapping based on the provided image
+        // Mapping matches the provided image logic
         const symbolMap = {
-            1: 'ç',
-            2: '≈',
-            3: '∃',
-            4: '=',
-            5: '∇',
-            6: '∝',
-            7: '∞',
-            8: '¢',
-            9: '∈',
-            0: '§'
+            1: 'ç', 2: '≈', 3: '∃', 4: '=', 5: '∇',
+            6: '∝', 7: '∞', 8: '¢', 9: '∈', 0: '§'
         };
 
-        let score = 0;
-        let timeLeft = 60;
-        let timerInterval;
+        // Game State Variables
+        let durationMinutes = 3;
+        let currentMinuteIndex = 1;
+        let timeLeftInMinute = 60;
+        let questionsAnsweredThisMinute = 0;
+        let correctAnswersThisMinute = 0;
+        
         let currentAnswer = 0;
         let gameActive = false;
+        let timerInterval;
+        let scoresPerMinute = []; // Array to hold score for each minute
 
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const testScreen = document.getElementById('test-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
         const timerEl = document.getElementById('timer');
-        const scoreEl = document.getElementById('score');
-        const problemEl = document.getElementById('problem-display');
-        const overlay = document.getElementById('overlay');
-        const overlayTitle = document.getElementById('overlay-title');
-        const overlayDesc = document.getElementById('overlay-desc');
-        const finalScoreContainer = document.getElementById('final-score-container');
-        const finalScoreEl = document.getElementById('final-score');
+        const currentSetEl = document.getElementById('current-set');
+        const totalSetsEl = document.getElementById('total-sets');
+        const questionsCountEl = document.getElementById('questions-count');
+        
+        const problemDisplay = document.getElementById('problem-display');
+        const waitingMsg = document.getElementById('waiting-msg');
+        const numpad = document.getElementById('numpad');
         const bodyEl = document.getElementById('game-body');
+        
+        let resultsChartInstance = null;
 
         function startGame() {
-            score = 0;
-            timeLeft = 60;
+            // Setup parameters
+            const durationSelect = document.getElementById('duration');
+            durationMinutes = parseInt(durationSelect.value);
+            totalSetsEl.innerText = durationMinutes;
+            
+            // Reset state
+            currentMinuteIndex = 1;
+            timeLeftInMinute = 60;
+            scoresPerMinute = [];
+            resetSetState();
+            
+            // UI Switching
+            startScreen.classList.add('hidden-screen');
+            testScreen.classList.remove('hidden-screen');
             gameActive = true;
             
-            scoreEl.innerText = score;
-            timerEl.innerText = timeLeft;
-            overlay.classList.add('hidden');
-            
+            updateUI();
             generateProblem();
             
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                timerEl.innerText = timeLeft;
+            // Start Master Timer
+            timerInterval = setInterval(gameLoop, 1000);
+        }
+
+        function resetSetState() {
+            questionsAnsweredThisMinute = 0;
+            correctAnswersThisMinute = 0;
+            waitingMsg.classList.add('hidden');
+            problemDisplay.classList.remove('hidden');
+            numpad.style.opacity = '1';
+            numpad.style.pointerEvents = 'auto';
+        }
+
+        function gameLoop() {
+            timeLeftInMinute--;
+            
+            if (timeLeftInMinute <= 0) {
+                // Minute ended: save score
+                scoresPerMinute.push(correctAnswersThisMinute);
                 
-                if (timeLeft <= 0) {
+                currentMinuteIndex++;
+                
+                if (currentMinuteIndex > durationMinutes) {
                     endGame();
+                    return;
                 }
-            }, 1000);
+                
+                // Start next minute set
+                timeLeftInMinute = 60;
+                resetSetState();
+                generateProblem();
+            }
+            
+            updateUI();
+        }
+
+        function updateUI() {
+            timerEl.innerText = timeLeftInMinute;
+            currentSetEl.innerText = currentMinuteIndex;
+            questionsCountEl.innerText = questionsAnsweredThisMinute;
+        }
+
+        function generateProblem() {
+            const num1 = Math.floor(Math.random() * 10);
+            const num2 = Math.floor(Math.random() * 10);
+            
+            // Last digit of sum
+            currentAnswer = (num1 + num2) % 10;
+            
+            problemDisplay.innerText = `${symbolMap[num1]} + ${symbolMap[num2]}`;
+        }
+
+        function submitAnswer(num) {
+            if (!gameActive || questionsAnsweredThisMinute >= 50) return;
+
+            questionsAnsweredThisMinute++;
+
+            if (num === currentAnswer) {
+                correctAnswersThisMinute++;
+            } else {
+                // Flash visual feedback for wrong answer
+                bodyEl.classList.remove('flash-red');
+                void bodyEl.offsetWidth; // Trigger reflow
+                bodyEl.classList.add('flash-red');
+            }
+
+            questionsCountEl.innerText = questionsAnsweredThisMinute;
+
+            if (questionsAnsweredThisMinute >= 50) {
+                // Maximum questions for this minute reached
+                problemDisplay.classList.add('hidden');
+                waitingMsg.classList.remove('hidden');
+                numpad.style.opacity = '0.5';
+                numpad.style.pointerEvents = 'none';
+            } else {
+                generateProblem();
+            }
         }
 
         function endGame() {
             gameActive = false;
             clearInterval(timerInterval);
             
-            overlayTitle.innerText = "Time's Up!";
-            overlayDesc.classList.add('hidden');
-            finalScoreContainer.classList.remove('hidden');
-            finalScoreEl.innerText = score;
+            testScreen.classList.add('hidden-screen');
+            resultScreen.classList.remove('hidden-screen');
             
-            overlay.classList.remove('hidden');
+            const totalScore = scoresPerMinute.reduce((a, b) => a + b, 0);
+            document.getElementById('total-score-display').innerText = `Total Jawaban Benar: ${totalScore} dari ${durationMinutes * 50} soal maksimal`;
+            
+            renderChart();
         }
 
-        function generateProblem() {
-            // Generate two random numbers between 0 and 9
-            const num1 = Math.floor(Math.random() * 10);
-            const num2 = Math.floor(Math.random() * 10);
+        function renderChart() {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
             
-            // Calculate Kraepelin answer (last digit of sum)
-            currentAnswer = (num1 + num2) % 10;
+            const labels = Array.from({length: durationMinutes}, (_, i) => `Set ${i + 1}`);
             
-            // Update display with symbols
-            problemEl.innerText = `${symbolMap[num1]} + ${symbolMap[num2]}`;
-        }
-
-        function submitAnswer(num) {
-            if (!gameActive) return;
-
-            if (num === currentAnswer) {
-                // Correct
-                score++;
-                scoreEl.innerText = score;
-            } else {
-                // Incorrect - Flash red
-                bodyEl.classList.remove('flash-red');
-                void bodyEl.offsetWidth; // Trigger reflow to restart animation
-                bodyEl.classList.add('flash-red');
+            if (resultsChartInstance) {
+                resultsChartInstance.destroy();
             }
-            
-            // Generate next problem regardless of right/wrong in Kraepelin tests
-            generateProblem();
+
+            resultsChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Jawaban Benar per Menit',
+                        data: scoresPerMinute,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#1e40af',
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 50,
+                            title: {
+                                display: true,
+                                text: 'Skor'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Menit ke-'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
         }
 
-        // Add keyboard support for ease of use on desktop
+        // Keyboard Support (Numpad)
         document.addEventListener('keydown', (e) => {
-            if (gameActive && e.key >= '0' && e.key <= '9') {
-                submitAnswer(parseInt(e.key));
-            } else if (!gameActive && e.key === 'Enter') {
-                startGame();
+            if (gameActive && !startScreen.classList.contains('hidden-screen') === false) {
+                if (e.key >= '0' && e.key <= '9') {
+                    submitAnswer(parseInt(e.key));
+                }
             }
         });
     </script>
