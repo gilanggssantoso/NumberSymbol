@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol Addition Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            touch-action: manipulation; /* Prevent double-tap zoom on mobile */
+        }
+        
+        .legend-table {
+            background-color: #E8C3C3; /* Muted pinkish-peach */
+            border: 2px solid #5a3d2b;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .legend-table th, .legend-table td {
+            border: 1px solid #8c6246;
+            text-align: center;
+            padding: 8px 4px;
+            font-size: 1.25rem;
+        }
+
+        .legend-table th {
+            font-weight: 500;
+        }
+        
+        .legend-table td {
+            font-family: serif; /* Better display for some symbols */
+            font-size: 1.5rem;
+        }
+
+        .flash-red {
+            animation: flash-red-anim 0.3s ease-out;
+        }
+
+        @keyframes flash-red-anim {
+            0% { background-color: #f3f4f6; }
+            50% { background-color: #fca5a5; }
+            100% { background-color: #f3f4f6; }
+        }
+
+        .numpad-btn {
+            background-color: #f8fafc;
+            border: 2px solid #3b82f6; /* Blueish border like the image */
+            color: #1e3a8a;
+            font-size: 1.5rem;
+            border-radius: 4px;
+            padding: 1rem;
+            transition: all 0.1s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .numpad-btn:active {
+            background-color: #dbeafe;
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300" id="game-body">
+
+    <!-- Start / Game Over Screen -->
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-sm w-full mx-4">
+            <h1 class="text-2xl font-bold mb-4" id="overlay-title">Symbol Addition Test</h1>
+            <p class="text-gray-600 mb-6" id="overlay-desc">Add the values of the two symbols. If the sum is 10 or more, enter only the last digit (e.g., 8 + 7 = 15, answer is 5).<br><br>You have 60 seconds.</p>
+            
+            <div id="final-score-container" class="hidden mb-6">
+                <p class="text-lg text-gray-500">Your Score</p>
+                <p class="text-5xl font-black text-blue-600" id="final-score">0</p>
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg">
+                Start Test
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Game UI -->
+    <div class="w-full max-w-md flex flex-col items-center gap-6">
+        
+        <!-- Header: Timer and Score -->
+        <div class="flex justify-between w-full text-lg font-semibold text-gray-700 px-2">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span id="timer">60</span>s
+            </div>
+            <div class="flex items-center gap-2">
+                Score: <span id="score" class="text-blue-600 text-xl font-bold">0</span>
+            </div>
+        </div>
+
+        <!-- Legend Table -->
+        <table class="legend-table shadow-sm">
+            <thead>
+                <tr>
+                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                    <th>6</th><th>7</th><th>8</th><th>9</th><th>0</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ç</td><td>≈</td><td>∃</td><td>=</td><td>∇</td>
+                    <td>∝</td><td>∞</td><td>¢</td><td>∈</td><td>§</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Problem Display -->
+        <div class="py-8 w-full flex items-center justify-center">
+            <h2 id="problem-display" class="text-6xl font-serif text-gray-800 tracking-widest">
+                ¢ + ∞
+            </h2>
+        </div>
+
+        <!-- Number Pad -->
+        <div class="grid grid-cols-3 gap-3 w-full">
+            <button class="numpad-btn" onclick="submitAnswer(7)">7</button>
+            <button class="numpad-btn" onclick="submitAnswer(8)">8</button>
+            <button class="numpad-btn" onclick="submitAnswer(9)">9</button>
+            
+            <button class="numpad-btn" onclick="submitAnswer(4)">4</button>
+            <button class="numpad-btn" onclick="submitAnswer(5)">5</button>
+            <button class="numpad-btn" onclick="submitAnswer(6)">6</button>
+            
+            <button class="numpad-btn" onclick="submitAnswer(1)">1</button>
+            <button class="numpad-btn" onclick="submitAnswer(2)">2</button>
+            <button class="numpad-btn" onclick="submitAnswer(3)">3</button>
+            
+            <button class="numpad-btn col-span-3" onclick="submitAnswer(0)">0</button>
+        </div>
+    </div>
+
+    <script>
+        // Mapping based on the provided image
+        const symbolMap = {
+            1: 'ç',
+            2: '≈',
+            3: '∃',
+            4: '=',
+            5: '∇',
+            6: '∝',
+            7: '∞',
+            8: '¢',
+            9: '∈',
+            0: '§'
+        };
+
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval;
+        let currentAnswer = 0;
+        let gameActive = false;
+
+        const timerEl = document.getElementById('timer');
+        const scoreEl = document.getElementById('score');
+        const problemEl = document.getElementById('problem-display');
+        const overlay = document.getElementById('overlay');
+        const overlayTitle = document.getElementById('overlay-title');
+        const overlayDesc = document.getElementById('overlay-desc');
+        const finalScoreContainer = document.getElementById('final-score-container');
+        const finalScoreEl = document.getElementById('final-score');
+        const bodyEl = document.getElementById('game-body');
+
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            gameActive = true;
+            
+            scoreEl.innerText = score;
+            timerEl.innerText = timeLeft;
+            overlay.classList.add('hidden');
+            
+            generateProblem();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            overlayTitle.innerText = "Time's Up!";
+            overlayDesc.classList.add('hidden');
+            finalScoreContainer.classList.remove('hidden');
+            finalScoreEl.innerText = score;
+            
+            overlay.classList.remove('hidden');
+        }
+
+        function generateProblem() {
+            // Generate two random numbers between 0 and 9
+            const num1 = Math.floor(Math.random() * 10);
+            const num2 = Math.floor(Math.random() * 10);
+            
+            // Calculate Kraepelin answer (last digit of sum)
+            currentAnswer = (num1 + num2) % 10;
+            
+            // Update display with symbols
+            problemEl.innerText = `${symbolMap[num1]} + ${symbolMap[num2]}`;
+        }
+
+        function submitAnswer(num) {
+            if (!gameActive) return;
+
+            if (num === currentAnswer) {
+                // Correct
+                score++;
+                scoreEl.innerText = score;
+            } else {
+                // Incorrect - Flash red
+                bodyEl.classList.remove('flash-red');
+                void bodyEl.offsetWidth; // Trigger reflow to restart animation
+                bodyEl.classList.add('flash-red');
+            }
+            
+            // Generate next problem regardless of right/wrong in Kraepelin tests
+            generateProblem();
+        }
+
+        // Add keyboard support for ease of use on desktop
+        document.addEventListener('keydown', (e) => {
+            if (gameActive && e.key >= '0' && e.key <= '9') {
+                submitAnswer(parseInt(e.key));
+            } else if (!gameActive && e.key === 'Enter') {
+                startGame();
+            }
+        });
+    </script>
+</body>
+</html>
