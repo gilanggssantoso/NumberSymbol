@@ -80,7 +80,6 @@
             color: #111;
             letter-spacing: clamp(0.1em, 2vw, 0.2em);
             text-align: center;
-            width: 100%;
             line-height: 1;
         }
 
@@ -144,12 +143,11 @@
 
     <div class="app-container">
         <!-- START SCREEN -->
-        <div id="start-screen" class="screen bg-white rounded-2xl shadow-xl p-4 sm:p-8">
-            <h1 class="text-xl sm:text-3xl font-bold text-center text-gray-800 mb-2 sm:mb-4 shrink-0">Tes Angka Simbol</h1>
+        <div id="start-screen" class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 flex flex-col justify-center items-center h-fit max-h-full w-full my-auto gap-4 sm:gap-6">
+            <h1 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 shrink-0">Tes Angka Simbol</h1>
             
-            <!-- Flex-1 and min-h-0 allows instructions to shrink/scroll if needed, protecting the button -->
-            <div class="flex-1 min-h-0 bg-blue-50 text-blue-800 p-3 sm:p-4 rounded-lg mb-3 sm:mb-4 text-[11px] sm:text-sm leading-relaxed border border-blue-200 overflow-y-auto w-full">
-                <h2 class="font-bold text-sm sm:text-lg mb-1 sm:mb-2">Instruksi:</h2>
+            <div class="bg-blue-50 text-blue-800 p-4 rounded-lg text-xs sm:text-sm leading-relaxed border border-blue-200 w-full max-w-lg h-fit shrink-0">
+                <h2 class="font-bold text-sm sm:text-base mb-2">Instruksi:</h2>
                 <ul class="list-disc pl-5 space-y-1">
                     <li>Anda akan melihat tabel legenda yang memetakan angka 0-9 ke simbol tertentu.</li>
                     <li>Tugas Anda adalah <strong>menjumlahkan</strong> nilai kedua simbol yang muncul.</li>
@@ -159,28 +157,30 @@
                 </ul>
             </div>
 
-            <div class="shrink-0 mb-3 sm:mb-4 w-full">
-                <label for="duration" class="block text-gray-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Pilih Durasi Tes:</label>
-                <select id="duration" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 sm:p-3">
-                    <option value="3">3 Menit (3 Set)</option>
-                    <option value="5">5 Menit (5 Set)</option>
-                    <option value="10">10 Menit (10 Set)</option>
-                    <option value="20">20 Menit (20 Set)</option>
-                    <option value="30">30 Menit (30 Set)</option>
-                    <option value="60">60 Menit (60 Set)</option>
-                </select>
-            </div>
+            <!-- Group Duration Dropdown & Start Button closely -->
+            <div class="shrink-0 w-full max-w-lg flex flex-col gap-3">
+                <div>
+                    <label for="duration" class="block text-gray-700 font-semibold mb-1 text-sm">Pilih Durasi Tes:</label>
+                    <select id="duration" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 sm:p-3">
+                        <option value="3">3 Menit (3 Set)</option>
+                        <option value="5">5 Menit (5 Set)</option>
+                        <option value="10">10 Menit (10 Set)</option>
+                        <option value="20">20 Menit (20 Set)</option>
+                        <option value="30">30 Menit (30 Set)</option>
+                        <option value="60">60 Menit (60 Set)</option>
+                    </select>
+                </div>
 
-            <!-- Shrink-0 ensures button is never squished or pushed off screen -->
-            <button onclick="startGame()" class="shrink-0 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-base sm:text-xl shadow-lg mt-auto">
-                Mulai Tes
-            </button>
+                <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-base sm:text-lg shadow-lg">
+                    Mulai Tes
+                </button>
+            </div>
         </div>
 
         <!-- TEST SCREEN -->
-        <div id="test-screen" class="screen hidden-screen">
-            <!-- Header Info -->
-            <div class="w-full bg-white rounded-xl shadow-sm p-1.5 sm:p-3 flex justify-between items-center border border-gray-200 shrink-0 mb-1.5 sm:mb-3">
+        <div id="test-screen" class="screen hidden-screen flex flex-col h-full">
+            <!-- Header Info (Stays at the top) -->
+            <div class="w-full bg-white rounded-xl shadow-sm p-1.5 sm:p-3 flex justify-between items-center border border-gray-200 shrink-0">
                 <div class="text-center">
                     <p class="text-[9px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Waktu (Set)</p>
                     <p class="text-base sm:text-xl font-bold text-red-600 leading-tight"><span id="timer">60</span>s</p>
@@ -195,50 +195,55 @@
                 </div>
             </div>
 
-            <!-- Legend Table -->
-            <div class="w-full shrink-0 mb-1.5 sm:mb-3 flex justify-center">
-                <table class="legend-table">
-                    <thead>
-                        <tr>
-                            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
-                            <th>6</th><th>7</th><th>8</th><th>9</th><th>0</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>ç</td><td>≈</td><td>∃</td><td>=</td><td>∇</td>
-                            <td>∝</td><td>∞</td><td>¢</td><td>∈</td><td>§</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- Centered Game Area (Takes remaining height and centers content) -->
+            <div class="flex-1 min-h-0 flex flex-col justify-center items-center gap-4 sm:gap-6 w-full py-2">
+                
+                <!-- Legend Table -->
+                <div class="w-full shrink-0 flex justify-center">
+                    <table class="legend-table">
+                        <thead>
+                            <tr>
+                                <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                                <th>6</th><th>7</th><th>8</th><th>9</th><th>0</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ç</td><td>≈</td><td>∃</td><td>=</td><td>∇</td>
+                                <td>∝</td><td>∞</td><td>¢</td><td>∈</td><td>§</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-            <!-- Problem Space: flex-1 min-h-0 allows it to absorb empty space without pushing Numpad out -->
-            <div class="bg-white rounded-xl shadow-sm w-full max-w-sm mx-auto flex-1 min-h-0 flex flex-col items-center justify-center border border-gray-200 mb-2 sm:mb-4 p-2">
-                <h2 id="problem-display" class="problem-display">
-                    ¢ + ∞
-                </h2>
-                <p id="waiting-msg" class="text-sm sm:text-lg text-orange-600 font-semibold hidden text-center px-2">
-                    Set selesai. Menunggu menit berikutnya...
-                </p>
-            </div>
+                <!-- Problem Space (Now narrower and h-fit) -->
+                <div class="bg-white rounded-xl shadow-sm w-full max-w-[16rem] h-fit flex-col items-center justify-center border border-gray-200 p-3 sm:p-4 shrink-0 mx-auto">
+                    <h2 id="problem-display" class="problem-display">
+                        ¢ + ∞
+                    </h2>
+                    <p id="waiting-msg" class="text-xs sm:text-sm text-orange-600 font-semibold hidden text-center px-1">
+                        Set selesai.<br>Menunggu menit berikutnya...
+                    </p>
+                </div>
 
-            <!-- Number Pad -->
-            <div class="w-full shrink-0 pb-1">
-                <div class="numpad" id="numpad">
-                    <button class="numpad-btn" onclick="submitAnswer(7)">7</button>
-                    <button class="numpad-btn" onclick="submitAnswer(8)">8</button>
-                    <button class="numpad-btn" onclick="submitAnswer(9)">9</button>
-                    
-                    <button class="numpad-btn" onclick="submitAnswer(4)">4</button>
-                    <button class="numpad-btn" onclick="submitAnswer(5)">5</button>
-                    <button class="numpad-btn" onclick="submitAnswer(6)">6</button>
-                    
-                    <button class="numpad-btn" onclick="submitAnswer(1)">1</button>
-                    <button class="numpad-btn" onclick="submitAnswer(2)">2</button>
-                    <button class="numpad-btn" onclick="submitAnswer(3)">3</button>
-                    
-                    <button class="numpad-btn col-span-3 bg-gray-100 hover:bg-gray-200 text-gray-800 border-gray-400" onclick="submitAnswer(0)">0</button>
+                <!-- Number Pad -->
+                <div class="w-full shrink-0 max-w-sm">
+                    <div class="numpad" id="numpad">
+                        <button class="numpad-btn" onclick="submitAnswer(7)">7</button>
+                        <button class="numpad-btn" onclick="submitAnswer(8)">8</button>
+                        <button class="numpad-btn" onclick="submitAnswer(9)">9</button>
+                        
+                        <button class="numpad-btn" onclick="submitAnswer(4)">4</button>
+                        <button class="numpad-btn" onclick="submitAnswer(5)">5</button>
+                        <button class="numpad-btn" onclick="submitAnswer(6)">6</button>
+                        
+                        <button class="numpad-btn" onclick="submitAnswer(1)">1</button>
+                        <button class="numpad-btn" onclick="submitAnswer(2)">2</button>
+                        <button class="numpad-btn" onclick="submitAnswer(3)">3</button>
+                        
+                        <!-- The zero button now identically matches the other buttons -->
+                        <button class="numpad-btn col-span-3" onclick="submitAnswer(0)">0</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -254,7 +259,7 @@
                 <canvas id="resultsChart"></canvas>
             </div>
 
-            <div class="w-full shrink-0 mt-3">
+            <div class="w-full shrink-0 mt-3 max-w-sm mx-auto">
                 <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-base sm:text-xl shadow-md">
                     Kembali ke Beranda
                 </button>
@@ -263,7 +268,7 @@
     </div>
 
     <script>
-        // Mapping matches the provided image logic
+        // Mapping matches the provided logic
         const symbolMap = {
             1: 'ç', 2: '≈', 3: '∃', 4: '=', 5: '∇',
             6: '∝', 7: '∞', 8: '¢', 9: '∈', 0: '§'
@@ -408,19 +413,16 @@
             }
 
             resultsChartInstance = new Chart(ctx, {
-                type: 'line',
+                type: 'bar', // Changed from line to bar chart
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Jawaban Benar per Menit',
                         data: scoresPerMinute,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#1e40af',
-                        pointRadius: 5,
-                        fill: true,
-                        tension: 0.3
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: '#2563eb',
+                        borderWidth: 2,
+                        borderRadius: 4
                     }]
                 },
                 options: {
@@ -430,7 +432,7 @@
                         y: {
                             beginAtZero: true,
                             max: 50,
-                            title: { display: true, text: 'Skor' }
+                            title: { display: true, text: 'Skor (Maks 50)' }
                         },
                         x: {
                             title: { display: true, text: 'Menit ke-' }
