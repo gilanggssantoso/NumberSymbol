@@ -216,14 +216,11 @@
                     </table>
                 </div>
 
-                <!-- Problem Space (Now narrower and h-fit) -->
-                <div class="bg-white rounded-xl shadow-sm w-full max-w-[16rem] h-fit flex-col items-center justify-center border border-gray-200 p-3 sm:p-4 shrink-0 mx-auto">
-                    <h2 id="problem-display" class="problem-display">
+                <!-- Problem Space (Now wider to fit all symbols) -->
+                <div class="bg-white rounded-xl shadow-sm w-full min-w-[20rem] max-w-sm h-fit flex-col items-center justify-center border border-gray-200 p-3 sm:p-4 shrink-0 mx-auto">
+                    <h2 id="problem-display" class="problem-display whitespace-nowrap">
                         ¢ + ∞
                     </h2>
-                    <p id="waiting-msg" class="text-xs sm:text-sm text-orange-600 font-semibold hidden text-center px-1">
-                        Set selesai.<br>Menunggu menit berikutnya...
-                    </p>
                 </div>
 
                 <!-- Number Pad -->
@@ -297,7 +294,6 @@
         const questionsCountEl = document.getElementById('questions-count');
         
         const problemDisplay = document.getElementById('problem-display');
-        const waitingMsg = document.getElementById('waiting-msg');
         const numpad = document.getElementById('numpad');
         const bodyEl = document.getElementById('game-body');
         
@@ -326,30 +322,34 @@
         function resetSetState() {
             questionsAnsweredThisMinute = 0;
             correctAnswersThisMinute = 0;
-            waitingMsg.classList.add('hidden');
             problemDisplay.classList.remove('hidden');
             numpad.style.opacity = '1';
             numpad.style.pointerEvents = 'auto';
+        }
+
+        function proceedToNextSet() {
+            scoresPerMinute.push(correctAnswersThisMinute);
+            currentMinuteIndex++;
+            
+            if (currentMinuteIndex > durationMinutes) {
+                endGame();
+                return;
+            }
+            
+            timeLeftInMinute = 60;
+            resetSetState();
+            generateProblem();
+            updateUI();
         }
 
         function gameLoop() {
             timeLeftInMinute--;
             
             if (timeLeftInMinute <= 0) {
-                scoresPerMinute.push(correctAnswersThisMinute);
-                currentMinuteIndex++;
-                
-                if (currentMinuteIndex > durationMinutes) {
-                    endGame();
-                    return;
-                }
-                
-                timeLeftInMinute = 60;
-                resetSetState();
-                generateProblem();
+                proceedToNextSet();
+            } else {
+                updateUI();
             }
-            
-            updateUI();
         }
 
         function updateUI() {
@@ -367,7 +367,7 @@
         }
 
         function submitAnswer(num) {
-            if (!gameActive || questionsAnsweredThisMinute >= 50) return;
+            if (!gameActive) return;
 
             questionsAnsweredThisMinute++;
 
@@ -382,10 +382,7 @@
             questionsCountEl.innerText = questionsAnsweredThisMinute;
 
             if (questionsAnsweredThisMinute >= 50) {
-                problemDisplay.classList.add('hidden');
-                waitingMsg.classList.remove('hidden');
-                numpad.style.opacity = '0.5';
-                numpad.style.pointerEvents = 'none';
+                proceedToNextSet();
             } else {
                 generateProblem();
             }
