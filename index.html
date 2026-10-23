@@ -7,11 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --peach-bg: #E8C3C3;
-        }
-
-        /* Base Body - Prevent scrolling entirely, use dvh for mobile UI consistency */
+        /* Base Body - Strict 100dvh, absolutely no scrolling */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
@@ -27,7 +23,7 @@
             justify-content: center;
         }
         
-        /* Full-screen Container that guarantees no overflow */
+        /* Container ensuring boundaries */
         .app-container {
             width: 100%;
             height: 100%;
@@ -37,68 +33,62 @@
             padding: clamp(0.5rem, 1.5dvh, 1rem);
         }
 
-        /* Screen Wrapper */
         .screen {
             flex: 1;
             display: flex;
             flex-direction: column;
             width: 100%;
             height: 100%;
-            min-h-0; /* Crucial for nested flexbox shrinking */
+            min-height: 0; 
         }
 
         .hidden-screen {
             display: none !important;
         }
 
-        /* Legend Table styling */
+        /* Legend Table Styling - Pastel Peach with responsive font sizes */
         .legend-table {
-            background-color: var(--peach-bg);
+            background-color: #E8C3C3;
             border: 2px solid #5a3d2b;
             border-collapse: collapse;
-            width: max-content; 
+            width: 100%; 
+            table-layout: fixed;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin: 0 auto;
         }
         
+        /* CRITICAL: clamp() for identical big sizes on mobile & desktop */
         .legend-table th, .legend-table td {
             border: 1px solid #8c6246;
             text-align: center;
-            padding: clamp(0.1rem, 1dvh, 0.4rem) clamp(0.2rem, 1.5vw, 0.6rem);
-            line-height: 1;
+            padding: clamp(0.1rem, 1dvh, 0.3rem) 0;
+            line-height: 1.2;
             font-family: 'Times New Roman', serif;
-            font-size: clamp(1.2rem, 5vw, 2.5rem); 
+            font-size: clamp(1.8rem, 8vw, 2.5rem); 
             font-weight: 800;
             color: #111;
         }
 
         /* Problem Display */
         .problem-display {
-            font-size: clamp(2.5rem, 8dvh, 5rem);
+            font-size: clamp(2.5rem, 8vw, 4rem);
             font-family: 'Times New Roman', serif;
             font-weight: bold;
             color: #111;
-            letter-spacing: clamp(0.1em, 2vw, 0.2em);
-            text-align: center;
-            line-height: 1;
         }
 
-        /* Number Pad styling */
+        /* Number Pad */
         .numpad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: clamp(0.25rem, 1dvh, 0.5rem);
             width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
         }
 
         .numpad-btn {
             background-color: #ffffff;
             border: 2px solid #3b82f6;
             color: #1e3a8a;
-            /* Scale button heights strictly so they don't break mobile bounds */
-            height: clamp(35px, 6.5dvh, 70px);
+            height: clamp(40px, 7dvh, 70px);
             font-size: clamp(1.2rem, 3dvh, 2rem);
             font-weight: 600;
             border-radius: 0.5rem;
@@ -118,7 +108,7 @@
             box-shadow: none;
         }
 
-        /* Flash Animation for Wrong Answer */
+        /* Flash Animation */
         .flash-red {
             animation: flash-red-anim 0.3s ease-out;
         }
@@ -129,7 +119,6 @@
             100% { background-color: #f3f4f6; }
         }
 
-        /* Chart Container */
         .chart-container {
             position: relative;
             flex-grow: 1;
@@ -142,23 +131,22 @@
 <body id="game-body">
 
     <div class="app-container">
+        
         <!-- START SCREEN -->
-        <div id="start-screen" class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 flex flex-col justify-center items-center h-fit max-h-full w-full my-auto gap-4 sm:gap-6">
+        <div id="start-screen" class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 flex flex-col justify-center items-center h-fit max-h-full w-full max-w-md mx-auto my-auto gap-4 sm:gap-6 border border-gray-200">
             <h1 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 shrink-0">Tes Angka Simbol</h1>
             
-            <div class="bg-blue-50 text-blue-800 p-4 rounded-lg text-xs sm:text-sm leading-relaxed border border-blue-200 w-full max-w-lg h-fit shrink-0">
+            <div class="bg-blue-50 text-blue-800 p-4 rounded-lg text-xs sm:text-sm leading-relaxed border border-blue-200 w-full shrink-0">
                 <h2 class="font-bold text-sm sm:text-base mb-2">Instruksi:</h2>
                 <ul class="list-disc pl-5 space-y-1">
-                    <li>Anda akan melihat tabel legenda yang memetakan angka 0-9 ke simbol tertentu.</li>
-                    <li>Tugas Anda adalah <strong>menjumlahkan</strong> nilai kedua simbol yang muncul.</li>
-                    <li>Jika hasilnya 10 atau lebih, masukkan <strong>digit terakhirnya saja</strong> (Contoh: 8 + 7 = 15, ketik 5).</li>
-                    <li>Tes dibagi menjadi beberapa set. Setiap set berlangsung <strong>1 menit</strong> dengan maksimal <strong>50 soal</strong>.</li>
-                    <li>Kerjakan secepat dan seteliti mungkin!</li>
+                    <li>Simbol pada tabel akan <strong>diacak</strong> setiap set baru.</li>
+                    <li>Tugas Anda: <strong>jumlahkan</strong> nilai kedua simbol.</li>
+                    <li>Jika hasilnya ≥ 10, ketik <strong>digit terakhirnya saja</strong> (Contoh: 8 + 7 = 15, ketik 5).</li>
+                    <li>Setiap set berlangsung <strong>1 menit</strong> (Maks: 50 soal).</li>
                 </ul>
             </div>
 
-            <!-- Group Duration Dropdown & Start Button closely -->
-            <div class="shrink-0 w-full max-w-lg flex flex-col gap-3">
+            <div class="shrink-0 w-full flex flex-col gap-3">
                 <div>
                     <label for="duration" class="block text-gray-700 font-semibold mb-1 text-sm">Pilih Durasi Tes:</label>
                     <select id="duration" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 sm:p-3">
@@ -178,29 +166,30 @@
         </div>
 
         <!-- TEST SCREEN -->
-        <div id="test-screen" class="screen hidden-screen flex flex-col h-full">
-            <!-- Header Info (Stays at the top) -->
-            <div class="w-full bg-white rounded-xl shadow-sm p-1.5 sm:p-3 flex justify-between items-center border border-gray-200 shrink-0">
+        <div id="test-screen" class="screen hidden-screen max-w-lg mx-auto">
+            <!-- Header (Pinned top) -->
+            <div class="w-full bg-white rounded-xl shadow-sm p-2 sm:p-3 flex justify-between items-center border border-gray-200 shrink-0 mb-2 sm:mb-4">
                 <div class="text-center">
-                    <p class="text-[9px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Waktu (Set)</p>
-                    <p class="text-base sm:text-xl font-bold text-red-600 leading-tight"><span id="timer">60</span>s</p>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Waktu (s)</p>
+                    <p class="text-lg sm:text-2xl font-bold text-red-600 leading-tight" id="timer">60</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-[9px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Set Saat Ini</p>
-                    <p class="text-base sm:text-xl font-bold text-gray-800 leading-tight"><span id="current-set">1</span> / <span id="total-sets">3</span></p>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Set</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800 leading-tight"><span id="current-set">1</span>/<span id="total-sets">3</span></p>
                 </div>
                 <div class="text-center">
-                    <p class="text-[9px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Terjawab</p>
-                    <p class="text-base sm:text-xl font-bold text-blue-600 leading-tight"><span id="questions-count">0</span>/50</p>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Terjawab</p>
+                    <p class="text-lg sm:text-2xl font-bold text-blue-600 leading-tight"><span id="questions-count">0</span>/50</p>
                 </div>
             </div>
 
-            <!-- Centered Game Area (Takes remaining height and centers content) -->
-            <div class="flex-1 min-h-0 flex flex-col justify-center items-center gap-4 sm:gap-6 w-full py-2">
+            <!-- Middle Container (Vertically centered, equal gaps) -->
+            <div class="flex-1 min-h-0 flex flex-col justify-center items-center w-full gap-2 sm:gap-4">
                 
-                <!-- Legend Table -->
-                <div class="w-full shrink-0 flex justify-center">
-                    <table class="legend-table">
+                <!-- Wrapper for Table & Problem Box ensures exact same width -->
+                <div class="w-full max-w-[450px] flex flex-col gap-2 sm:gap-4 shrink-0">
+                    <!-- Legend Table -->
+                    <table class="legend-table rounded-md overflow-hidden">
                         <thead>
                             <tr>
                                 <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
@@ -208,24 +197,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            <tr id="legend-symbols-row">
                                 <td>ç</td><td>≈</td><td>∃</td><td>=</td><td>∇</td>
                                 <td>∝</td><td>∞</td><td>¢</td><td>∈</td><td>§</td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
 
-                <!-- Problem Space (Now wider to fit all symbols) -->
-                <div class="bg-white rounded-xl shadow-sm w-full min-w-[20rem] max-w-sm h-fit flex-col items-center justify-center border border-gray-200 p-3 sm:p-4 shrink-0 mx-auto">
-                    <h2 id="problem-display" class="problem-display whitespace-nowrap">
-                        ¢ + ∞
-                    </h2>
+                    <!-- Problem Space (Now wider to fit all symbols) -->
+                    <div class="w-full bg-white border-2 border-gray-200 rounded-xl shadow-sm p-4 sm:p-6 flex justify-center items-center gap-4 flex-nowrap whitespace-nowrap">
+                        <span id="problem-symbol-1" class="problem-display"></span>
+                        <span class="problem-display">+</span>
+                        <span id="problem-symbol-2" class="problem-display"></span>
+                    </div>
                 </div>
 
                 <!-- Number Pad -->
-                <div class="w-full shrink-0 max-w-sm">
-                    <div class="numpad" id="numpad">
+                <div class="w-full max-w-[450px] shrink-0 mt-2">
+                    <div class="numpad">
                         <button class="numpad-btn" onclick="submitAnswer(7)">7</button>
                         <button class="numpad-btn" onclick="submitAnswer(8)">8</button>
                         <button class="numpad-btn" onclick="submitAnswer(9)">9</button>
@@ -238,7 +227,6 @@
                         <button class="numpad-btn" onclick="submitAnswer(2)">2</button>
                         <button class="numpad-btn" onclick="submitAnswer(3)">3</button>
                         
-                        <!-- The zero button now identically matches the other buttons -->
                         <button class="numpad-btn col-span-3" onclick="submitAnswer(0)">0</button>
                     </div>
                 </div>
@@ -246,30 +234,28 @@
         </div>
 
         <!-- RESULT SCREEN -->
-        <div id="result-screen" class="screen hidden-screen bg-white rounded-2xl shadow-xl p-4 sm:p-8 flex flex-col items-center justify-between">
+        <div id="result-screen" class="screen hidden-screen bg-white rounded-2xl shadow-xl p-4 sm:p-8 flex flex-col items-center justify-between w-full max-w-lg mx-auto">
             <div class="text-center w-full shrink-0">
-                <h2 class="text-xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">Hasil Tes Anda</h2>
-                <p class="text-sm sm:text-base text-gray-600 mb-3 sm:mb-6" id="total-score-display">Total Benar: 0</p>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Tes Selesai</h2>
+                <p class="text-base sm:text-lg text-gray-600 mb-4" id="total-score-display"></p>
             </div>
             
             <div class="chart-container">
                 <canvas id="resultsChart"></canvas>
             </div>
 
-            <div class="w-full shrink-0 mt-3 max-w-sm mx-auto">
+            <div class="w-full shrink-0 mt-4">
                 <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-base sm:text-xl shadow-md">
-                    Kembali ke Beranda
+                    Kembali ke Awal
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Mapping matches the provided logic
-        const symbolMap = {
-            1: 'ç', 2: '≈', 3: '∃', 4: '=', 5: '∇',
-            6: '∝', 7: '∞', 8: '¢', 9: '∈', 0: '§'
-        };
+        // Comprehensive Greek Letters Pool
+        const greekLettersPool = ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω', 'Γ', 'Δ', 'Θ', 'Λ', 'Ξ', 'Π', 'Σ', 'Φ', 'Ψ', 'Ω'];
+        let currentSymbolMap = {};
 
         // Game State Variables
         let durationMinutes = 3;
@@ -277,10 +263,10 @@
         let timeLeftInMinute = 60;
         let questionsAnsweredThisMinute = 0;
         let correctAnswersThisMinute = 0;
-        
         let currentAnswer = 0;
+        
         let gameActive = false;
-        let timerInterval;
+        let timerInterval = null;
         let scoresPerMinute = [];
 
         // DOM Elements
@@ -293,58 +279,84 @@
         const totalSetsEl = document.getElementById('total-sets');
         const questionsCountEl = document.getElementById('questions-count');
         
-        const problemDisplay = document.getElementById('problem-display');
-        const numpad = document.getElementById('numpad');
+        const probSym1 = document.getElementById('problem-symbol-1');
+        const probSym2 = document.getElementById('problem-symbol-2');
         const bodyEl = document.getElementById('game-body');
         
         let resultsChartInstance = null;
 
+        // Shuffle symbols and bind to 1-9, 0
+        function shuffleAndAssignSymbols() {
+            // Shuffle the large pool and pick 10
+            let shuffledPool = [...greekLettersPool].sort(() => 0.5 - Math.random());
+            let selectedSymbols = shuffledPool.slice(0, 10);
+            
+            // Map strictly to the visual table order: 1-9, then 0
+            const numberOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+            const legendRow = document.getElementById('legend-symbols-row');
+            
+            if (legendRow) {
+                legendRow.innerHTML = ''; // Clear old symbols
+                
+                numberOrder.forEach((num, index) => {
+                    currentSymbolMap[num] = selectedSymbols[index];
+                    
+                    let td = document.createElement('td');
+                    td.innerText = selectedSymbols[index];
+                    legendRow.appendChild(td);
+                });
+            }
+        }
+
         function startGame() {
             const durationSelect = document.getElementById('duration');
             durationMinutes = parseInt(durationSelect.value);
-            totalSetsEl.innerText = durationMinutes;
             
             currentMinuteIndex = 1;
-            timeLeftInMinute = 60;
             scoresPerMinute = [];
-            resetSetState();
             
             startScreen.classList.add('hidden-screen');
             testScreen.classList.remove('hidden-screen');
-            gameActive = true;
             
+            startNewSet();
+        }
+
+        function startNewSet() {
+            gameActive = true;
+            timeLeftInMinute = 60;
+            questionsAnsweredThisMinute = 0;
+            correctAnswersThisMinute = 0;
+            
+            shuffleAndAssignSymbols();
             updateUI();
             generateProblem();
             
+            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(gameLoop, 1000);
         }
 
-        function resetSetState() {
-            questionsAnsweredThisMinute = 0;
-            correctAnswersThisMinute = 0;
-            problemDisplay.classList.remove('hidden');
-            numpad.style.opacity = '1';
-            numpad.style.pointerEvents = 'auto';
-        }
-
         function proceedToNextSet() {
+            // Instantly halt current set
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            // Record score
             scoresPerMinute.push(correctAnswersThisMinute);
+            
+            // Increment set
             currentMinuteIndex++;
             
+            // Check if game over
             if (currentMinuteIndex > durationMinutes) {
                 endGame();
-                return;
+            } else {
+                // Immediately start next set
+                startNewSet();
             }
-            
-            timeLeftInMinute = 60;
-            resetSetState();
-            generateProblem();
-            updateUI();
         }
 
         function gameLoop() {
             timeLeftInMinute--;
-            
             if (timeLeftInMinute <= 0) {
                 proceedToNextSet();
             } else {
@@ -355,6 +367,7 @@
         function updateUI() {
             timerEl.innerText = timeLeftInMinute;
             currentSetEl.innerText = currentMinuteIndex;
+            totalSetsEl.innerText = durationMinutes;
             questionsCountEl.innerText = questionsAnsweredThisMinute;
         }
 
@@ -363,7 +376,8 @@
             const num2 = Math.floor(Math.random() * 10);
             
             currentAnswer = (num1 + num2) % 10;
-            problemDisplay.innerText = `${symbolMap[num1]} + ${symbolMap[num2]}`;
+            probSym1.innerText = currentSymbolMap[num1];
+            probSym2.innerText = currentSymbolMap[num2];
         }
 
         function submitAnswer(num) {
@@ -374,13 +388,15 @@
             if (num === currentAnswer) {
                 correctAnswersThisMinute++;
             } else {
+                // Flash red on wrong answer
                 bodyEl.classList.remove('flash-red');
-                void bodyEl.offsetWidth; 
+                void bodyEl.offsetWidth; // Trigger reflow to restart animation
                 bodyEl.classList.add('flash-red');
             }
 
-            questionsCountEl.innerText = questionsAnsweredThisMinute;
+            updateUI();
 
+            // Instant Switch if 50 questions reached
             if (questionsAnsweredThisMinute >= 50) {
                 proceedToNextSet();
             } else {
@@ -390,13 +406,14 @@
 
         function endGame() {
             gameActive = false;
-            clearInterval(timerInterval);
+            if (timerInterval) clearInterval(timerInterval);
             
             testScreen.classList.add('hidden-screen');
             resultScreen.classList.remove('hidden-screen');
             
             const totalScore = scoresPerMinute.reduce((a, b) => a + b, 0);
-            document.getElementById('total-score-display').innerText = `Total Jawaban Benar: ${totalScore} dari ${durationMinutes * 50} soal maksimal`;
+            const maxPossible = durationMinutes * 50;
+            document.getElementById('total-score-display').innerText = `Total Benar: ${totalScore} dari ${maxPossible}`;
             
             renderChart();
         }
@@ -410,15 +427,15 @@
             }
 
             resultsChartInstance = new Chart(ctx, {
-                type: 'bar', // Changed from line to bar chart
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Jawaban Benar per Menit',
+                        label: 'Jawaban Benar',
                         data: scoresPerMinute,
-                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                        borderColor: '#2563eb',
-                        borderWidth: 2,
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: '#1d4ed8',
+                        borderWidth: 1,
                         borderRadius: 4
                     }]
                 },
@@ -429,14 +446,11 @@
                         y: {
                             beginAtZero: true,
                             max: 50,
-                            title: { display: true, text: 'Skor (Maks 50)' }
-                        },
-                        x: {
-                            title: { display: true, text: 'Menit ke-' }
+                            ticks: { stepSize: 10 }
                         }
                     },
                     plugins: {
-                        legend: { display: true, position: 'top' }
+                        legend: { display: false } // Hide legend for cleaner look on mobile
                     }
                 }
             });
