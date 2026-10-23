@@ -55,8 +55,7 @@
             background-color: var(--peach-bg);
             border: 2px solid #5a3d2b;
             border-collapse: collapse;
-            width: 100%;
-            table-layout: fixed;
+            width: max-content; /* Prevents stretching to full width */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             margin: 0 auto;
         }
@@ -64,7 +63,7 @@
         .legend-table th, .legend-table td {
             border: 1px solid #8c6246;
             text-align: center;
-            padding: clamp(0.15rem, 1vh, 0.75rem) 0; /* Dynamic padding */
+            padding: clamp(0.15rem, 1vh, 0.5rem) clamp(0.3rem, 1.5vw, 0.8rem); /* Adjusted tight horizontal padding */
             line-height: 1;
             font-family: 'Times New Roman', serif;
             /* Using clamp ensures it's readable on mobile but not huge on desktop */
