@@ -11,7 +11,7 @@
             --peach-bg: #E8C3C3;
         }
 
-        /* Base Body - Prevent scrolling entirely */
+        /* Base Body - Prevent scrolling entirely, use dvh for mobile UI consistency */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
@@ -20,7 +20,7 @@
             margin: 0;
             padding: 0;
             width: 100vw;
-            height: 100vh;
+            height: 100dvh; 
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -34,7 +34,7 @@
             max-width: 800px;
             display: flex;
             flex-direction: column;
-            padding: clamp(0.5rem, 2vh, 1rem);
+            padding: clamp(0.5rem, 1.5dvh, 1rem);
         }
 
         /* Screen Wrapper */
@@ -44,6 +44,7 @@
             flex-direction: column;
             width: 100%;
             height: 100%;
+            min-h-0; /* Crucial for nested flexbox shrinking */
         }
 
         .hidden-screen {
@@ -55,18 +56,17 @@
             background-color: var(--peach-bg);
             border: 2px solid #5a3d2b;
             border-collapse: collapse;
-            width: max-content; /* Prevents stretching to full width */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: max-content; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             margin: 0 auto;
         }
         
         .legend-table th, .legend-table td {
             border: 1px solid #8c6246;
             text-align: center;
-            padding: clamp(0.15rem, 1vh, 0.5rem) clamp(0.3rem, 1.5vw, 0.8rem); /* Adjusted tight horizontal padding */
+            padding: clamp(0.1rem, 1dvh, 0.4rem) clamp(0.2rem, 1.5vw, 0.6rem);
             line-height: 1;
             font-family: 'Times New Roman', serif;
-            /* Using clamp ensures it's readable on mobile but not huge on desktop */
             font-size: clamp(1.2rem, 5vw, 2.5rem); 
             font-weight: 800;
             color: #111;
@@ -74,20 +74,21 @@
 
         /* Problem Display */
         .problem-display {
-            font-size: clamp(3rem, 10vh, 6rem);
+            font-size: clamp(2.5rem, 8dvh, 5rem);
             font-family: 'Times New Roman', serif;
             font-weight: bold;
             color: #111;
             letter-spacing: clamp(0.1em, 2vw, 0.2em);
             text-align: center;
             width: 100%;
+            line-height: 1;
         }
 
         /* Number Pad styling */
         .numpad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: clamp(0.25rem, 1.5vh, 0.75rem);
+            gap: clamp(0.25rem, 1dvh, 0.5rem);
             width: 100%;
             max-width: 400px;
             margin: 0 auto;
@@ -97,9 +98,9 @@
             background-color: #ffffff;
             border: 2px solid #3b82f6;
             color: #1e3a8a;
-            /* Scale button heights and text */
-            height: clamp(45px, 9vh, 80px);
-            font-size: clamp(1.2rem, 4vh, 2.25rem);
+            /* Scale button heights strictly so they don't break mobile bounds */
+            height: clamp(35px, 6.5dvh, 70px);
+            font-size: clamp(1.2rem, 3dvh, 2rem);
             font-weight: 600;
             border-radius: 0.5rem;
             transition: all 0.1s;
@@ -109,6 +110,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 0;
         }
 
         .numpad-btn:active {
@@ -128,11 +130,11 @@
             100% { background-color: #f3f4f6; }
         }
 
-        /* Ensure Chart Container behaves */
+        /* Chart Container */
         .chart-container {
             position: relative;
             flex-grow: 1;
-            min-height: 0; /* Important for Flexbox to allow shrinking */
+            min-height: 0; 
             width: 100%;
             margin-bottom: 1rem;
         }
@@ -142,10 +144,11 @@
 
     <div class="app-container">
         <!-- START SCREEN -->
-        <div id="start-screen" class="screen bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col items-center justify-center p-4 sm:p-8">
-            <h1 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-4 sm:mb-6">Tes Angka Simbol</h1>
+        <div id="start-screen" class="screen bg-white rounded-2xl shadow-xl p-4 sm:p-8">
+            <h1 class="text-xl sm:text-3xl font-bold text-center text-gray-800 mb-2 sm:mb-4 shrink-0">Tes Angka Simbol</h1>
             
-            <div class="bg-blue-50 text-blue-800 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed border border-blue-200 overflow-y-auto w-full">
+            <!-- Flex-1 and min-h-0 allows instructions to shrink/scroll if needed, protecting the button -->
+            <div class="flex-1 min-h-0 bg-blue-50 text-blue-800 p-3 sm:p-4 rounded-lg mb-3 sm:mb-4 text-[11px] sm:text-sm leading-relaxed border border-blue-200 overflow-y-auto w-full">
                 <h2 class="font-bold text-sm sm:text-lg mb-1 sm:mb-2">Instruksi:</h2>
                 <ul class="list-disc pl-5 space-y-1">
                     <li>Anda akan melihat tabel legenda yang memetakan angka 0-9 ke simbol tertentu.</li>
@@ -156,9 +159,9 @@
                 </ul>
             </div>
 
-            <div class="mb-4 sm:mb-6 w-full">
-                <label for="duration" class="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">Pilih Durasi Tes:</label>
-                <select id="duration" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-base sm:text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 sm:p-3">
+            <div class="shrink-0 mb-3 sm:mb-4 w-full">
+                <label for="duration" class="block text-gray-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Pilih Durasi Tes:</label>
+                <select id="duration" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 sm:p-3">
                     <option value="3">3 Menit (3 Set)</option>
                     <option value="5">5 Menit (5 Set)</option>
                     <option value="10">10 Menit (10 Set)</option>
@@ -168,7 +171,8 @@
                 </select>
             </div>
 
-            <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-lg sm:text-xl shadow-lg mt-auto sm:mt-0">
+            <!-- Shrink-0 ensures button is never squished or pushed off screen -->
+            <button onclick="startGame()" class="shrink-0 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-base sm:text-xl shadow-lg mt-auto">
                 Mulai Tes
             </button>
         </div>
@@ -176,23 +180,23 @@
         <!-- TEST SCREEN -->
         <div id="test-screen" class="screen hidden-screen">
             <!-- Header Info -->
-            <div class="w-full bg-white rounded-xl shadow-sm p-2 sm:p-4 flex justify-between items-center border border-gray-200 shrink-0 mb-2 sm:mb-4">
+            <div class="w-full bg-white rounded-xl shadow-sm p-1.5 sm:p-3 flex justify-between items-center border border-gray-200 shrink-0 mb-1.5 sm:mb-3">
                 <div class="text-center">
-                    <p class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase">Waktu (Set)</p>
-                    <p class="text-lg sm:text-2xl font-bold text-red-600"><span id="timer">60</span>s</p>
+                    <p class="text-[9px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Waktu (Set)</p>
+                    <p class="text-base sm:text-xl font-bold text-red-600 leading-tight"><span id="timer">60</span>s</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase">Set Saat Ini</p>
-                    <p class="text-lg sm:text-2xl font-bold text-gray-800"><span id="current-set">1</span> / <span id="total-sets">3</span></p>
+                    <p class="text-[9px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Set Saat Ini</p>
+                    <p class="text-base sm:text-xl font-bold text-gray-800 leading-tight"><span id="current-set">1</span> / <span id="total-sets">3</span></p>
                 </div>
                 <div class="text-center">
-                    <p class="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase">Terjawab</p>
-                    <p class="text-lg sm:text-2xl font-bold text-blue-600"><span id="questions-count">0</span>/50</p>
+                    <p class="text-[9px] sm:text-xs text-gray-500 font-semibold uppercase leading-tight">Terjawab</p>
+                    <p class="text-base sm:text-xl font-bold text-blue-600 leading-tight"><span id="questions-count">0</span>/50</p>
                 </div>
             </div>
 
             <!-- Legend Table -->
-            <div class="w-full shrink-0 mb-2 sm:mb-4">
+            <div class="w-full shrink-0 mb-1.5 sm:mb-3 flex justify-center">
                 <table class="legend-table">
                     <thead>
                         <tr>
@@ -209,18 +213,18 @@
                 </table>
             </div>
 
-            <!-- Problem Space (Takes up remaining vertical space) -->
-            <div class="bg-white rounded-xl shadow-sm w-full flex-grow flex flex-col items-center justify-center border border-gray-200 mb-2 sm:mb-4">
+            <!-- Problem Space: flex-1 min-h-0 allows it to absorb empty space without pushing Numpad out -->
+            <div class="bg-white rounded-xl shadow-sm w-full max-w-sm mx-auto flex-1 min-h-0 flex flex-col items-center justify-center border border-gray-200 mb-2 sm:mb-4 p-2">
                 <h2 id="problem-display" class="problem-display">
                     ¢ + ∞
                 </h2>
-                <p id="waiting-msg" class="text-base sm:text-xl text-orange-600 font-semibold hidden text-center px-4">
+                <p id="waiting-msg" class="text-sm sm:text-lg text-orange-600 font-semibold hidden text-center px-2">
                     Set selesai. Menunggu menit berikutnya...
                 </p>
             </div>
 
             <!-- Number Pad -->
-            <div class="w-full shrink-0 pb-1 sm:pb-0">
+            <div class="w-full shrink-0 pb-1">
                 <div class="numpad" id="numpad">
                     <button class="numpad-btn" onclick="submitAnswer(7)">7</button>
                     <button class="numpad-btn" onclick="submitAnswer(8)">8</button>
@@ -242,16 +246,16 @@
         <!-- RESULT SCREEN -->
         <div id="result-screen" class="screen hidden-screen bg-white rounded-2xl shadow-xl p-4 sm:p-8 flex flex-col items-center justify-between">
             <div class="text-center w-full shrink-0">
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">Hasil Tes Anda</h2>
-                <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6" id="total-score-display">Total Benar: 0</p>
+                <h2 class="text-xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">Hasil Tes Anda</h2>
+                <p class="text-sm sm:text-base text-gray-600 mb-3 sm:mb-6" id="total-score-display">Total Benar: 0</p>
             </div>
             
             <div class="chart-container">
                 <canvas id="resultsChart"></canvas>
             </div>
 
-            <div class="w-full shrink-0 mt-4">
-                <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-lg sm:text-xl shadow-md">
+            <div class="w-full shrink-0 mt-3">
+                <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-base sm:text-xl shadow-md">
                     Kembali ke Beranda
                 </button>
             </div>
