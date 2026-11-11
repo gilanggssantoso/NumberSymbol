@@ -140,9 +140,9 @@
                 <h2 class="font-bold text-sm sm:text-base mb-2">Instruksi:</h2>
                 <ul class="list-disc pl-5 space-y-1">
                     <li>Simbol pada tabel akan <strong>diacak</strong> setiap set baru.</li>
-                    <li>Tugas Anda adalah <strong>menjumlahkan</strong> nilai kedua simbol, yang mewakili angka tertentu dari 0–9.</li>
-                    <li>Jika hasilnya dua digit, masukkan <strong>digit terakhirnya saja</strong> (contoh: 8 + 7 = 15, maka masukkan 5).</li>
-                    <li>Setiap set berlangsung selama <strong>1 menit</strong>, dan terdiri dari 50 soal.</li>
+                    <li>Tugas Anda: <strong>jumlahkan</strong> nilai kedua simbol.</li>
+                    <li>Jika hasilnya ≥ 10, ketik <strong>digit terakhirnya saja</strong> (Contoh: 8 + 7 = 15, ketik 5).</li>
+                    <li>Setiap set berlangsung <strong>1 menit</strong> (Maks: 50 soal).</li>
                 </ul>
             </div>
 
@@ -269,20 +269,31 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Support for both Immersive Preview and GitHub Pages
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyAgOi-_0IyRCeSgK_oH5F8uLMaPM6aMH_c",
+            authDomain: "numbersymboltest.firebaseapp.com",
+            projectId: "numbersymboltest",
+            storageBucket: "numbersymboltest.firebasestorage.app",
+            messagingSenderId: "644850330136",
+            appId: "1:644850330136:web:2e5780ee9813cc9bbe716d",
+            measurementId: "G-GFTPCYB97T"
+        };
         
         let app, auth, db, currentUserId;
         
-        // Initialize Firebase
-        if (Object.keys(firebaseConfig).length > 0) {
+        // Only initialize Firebase if a valid config is provided (prevents console errors)
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
+            initAuth();
+        } else {
+            document.getElementById('take-count-display').innerText = "Data statistik disembunyikan (konfigurasi Firebase belum diisi).";
         }
 
         async function initAuth() {
-            if (!auth) return;
             try {
                 if (typeof __initial_auth_token !== 'undefined') {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -298,14 +309,20 @@
         }
 
         function getTodayDateString() {
-            // Returns YYYY-MM-DD correctly localized to your timezone constraint
             return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' }); 
+        }
+
+        function getStatsDocRef() {
+            // Use different paths based on environment
+            if (typeof __app_id !== 'undefined') {
+                return doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'daily');
+            }
+            return doc(db, 'statistics', 'daily_takes');
         }
 
         function listenToDailyCount() {
             if (!currentUserId || !db) return;
-            // Strict path format: /artifacts/{appId}/public/data/stats
-            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'daily');
+            const statsRef = getStatsDocRef();
             
             onSnapshot(statsRef, (docSnap) => {
                 const today = getTodayDateString();
@@ -329,7 +346,7 @@
 
         async function recordTestStart() {
             if (!currentUserId || !db) return;
-            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'daily');
+            const statsRef = getStatsDocRef();
             const today = getTodayDateString();
             
             try {
@@ -342,12 +359,6 @@
             } catch(e) {
                 console.error("Failed to record start:", e);
             }
-        }
-
-        if (Object.keys(firebaseConfig).length > 0) {
-            initAuth();
-        } else {
-            document.getElementById('take-count-display').style.display = 'none';
         }
 
         // Comprehensive Greek Letters Pool
