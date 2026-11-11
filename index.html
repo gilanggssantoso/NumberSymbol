@@ -140,9 +140,9 @@
                 <h2 class="font-bold text-sm sm:text-base mb-2">Instruksi:</h2>
                 <ul class="list-disc pl-5 space-y-1">
                     <li>Simbol pada tabel akan <strong>diacak</strong> setiap set baru.</li>
-                    <li>Tugas Anda: <strong>jumlahkan</strong> nilai kedua simbol.</li>
-                    <li>Jika hasilnya ≥ 10, ketik <strong>digit terakhirnya saja</strong> (Contoh: 8 + 7 = 15, ketik 5).</li>
-                    <li>Setiap set berlangsung <strong>1 menit</strong> (Maks: 50 soal).</li>
+                    <li>Tugas Anda adalah <strong>menjumlahkan</strong> nilai kedua simbol, yang mewakili angka tertentu dari 0–9.</li>
+                    <li>Jika hasilnya dua digit, masukkan <strong>digit terakhirnya saja</strong> (Contoh: 8 + 7 = 15, maka masukkan 5).</li>
+                    <li>Setiap set berlangsung selama <strong>1 menit</strong>, dan terdiri dari 50 soal).</li>
                 </ul>
             </div>
 
@@ -162,6 +162,11 @@
                 <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-colors text-base sm:text-lg shadow-lg">
                     Mulai Tes
                 </button>
+
+                <!-- Daily take counter display -->
+                <div id="take-count-display" class="text-xs sm:text-sm text-gray-500 font-medium text-center w-full shrink-0 mt-1">
+                    Memuat data statistik...
+                </div>
             </div>
         </div>
 
@@ -250,9 +255,101 @@
                 </button>
             </div>
         </div>
+
+        <!-- Global Footer -->
+        <div class="w-full text-center shrink-0 pt-2 pb-1 z-10">
+            <p class="font-mono text-[10px] sm:text-xs text-gray-500">
+                Vibe coded with <span class="text-red-500">❤️</span> by gilanggssantoso
+            </p>
+        </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        
+        let app, auth, db, currentUserId;
+        
+        // Initialize Firebase
+        if (Object.keys(firebaseConfig).length > 0) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        }
+
+        async function initAuth() {
+            if (!auth) return;
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                currentUserId = auth.currentUser.uid;
+                listenToDailyCount();
+            } catch (error) {
+                console.error("Auth error:", error);
+                document.getElementById('take-count-display').innerText = "Gagal memuat data statistik.";
+            }
+        }
+
+        function getTodayDateString() {
+            // Returns YYYY-MM-DD correctly localized to your timezone constraint
+            return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' }); 
+        }
+
+        function listenToDailyCount() {
+            if (!currentUserId || !db) return;
+            // Strict path format: /artifacts/{appId}/public/data/stats
+            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'daily');
+            
+            onSnapshot(statsRef, (docSnap) => {
+                const today = getTodayDateString();
+                const displayEl = document.getElementById('take-count-display');
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.date === today) {
+                        displayEl.innerText = `Jumlah peserta tes hari ini: ${data.count}`;
+                    } else {
+                        displayEl.innerText = `Jumlah peserta tes hari ini: 0`;
+                    }
+                } else {
+                    displayEl.innerText = `Jumlah peserta tes hari ini: 0`;
+                }
+            }, (error) => {
+                console.error("Snapshot error:", error);
+                document.getElementById('take-count-display').innerText = "Statistik saat ini tidak tersedia.";
+            });
+        }
+
+        async function recordTestStart() {
+            if (!currentUserId || !db) return;
+            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'daily');
+            const today = getTodayDateString();
+            
+            try {
+                const docSnap = await getDoc(statsRef);
+                if (docSnap.exists() && docSnap.data().date === today) {
+                    await setDoc(statsRef, { date: today, count: docSnap.data().count + 1 }, { merge: true });
+                } else {
+                    await setDoc(statsRef, { date: today, count: 1 });
+                }
+            } catch(e) {
+                console.error("Failed to record start:", e);
+            }
+        }
+
+        if (Object.keys(firebaseConfig).length > 0) {
+            initAuth();
+        } else {
+            document.getElementById('take-count-display').style.display = 'none';
+        }
+
         // Comprehensive Greek Letters Pool
         const greekLettersPool = ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω', 'Γ', 'Δ', 'Θ', 'Λ', 'Ξ', 'Π', 'Σ', 'Φ', 'Ψ', 'Ω'];
         let currentSymbolMap = {};
@@ -309,6 +406,9 @@
         }
 
         function startGame() {
+            // Count this test taking event for the daily statistics
+            recordTestStart(); 
+            
             const durationSelect = document.getElementById('duration');
             durationMinutes = parseInt(durationSelect.value);
             
@@ -464,6 +564,10 @@
                 }
             }
         });
+
+        // Expose functions to the window object since this is now a JS module
+        window.startGame = startGame;
+        window.submitAnswer = submitAnswer;
     </script>
 </body>
 </html>
