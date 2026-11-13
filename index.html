@@ -362,7 +362,14 @@
         }
 
         // Comprehensive Greek Letters Pool
-        const greekLettersPool = ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω', 'Γ', 'Δ', 'Θ', 'Λ', 'Ξ', 'Π', 'Σ', 'Φ', 'Ψ', 'Ω'];
+        const greekLettersPool = [
+        // Lowercase Greek
+        'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω', 
+        // Distinct Uppercase Greek
+        'Γ', 'Δ', 'Θ', 'Λ', 'Ξ', 'Π', 'Σ', 'Φ', 'Ψ', 'Ω', 
+        // 20 Distinct Monochromatic Unicode Symbols
+        '∞', '≈', '∇', '∂', '∫', '§', '¶', '⊗', '⊕', '⌘', '∀', '∃', '∅', '∈', '∴', '∝', '≠', '≡', '±', '÷'
+];
         let currentSymbolMap = {};
 
         // Game State Variables
